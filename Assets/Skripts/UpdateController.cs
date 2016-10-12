@@ -7,19 +7,28 @@ using UnityEngine;
 class UpdateController : MonoBehaviour, IUpdateable
 {
 
-    List<IUpdateable> objects = new List<IUpdateable>();
+    //List<IUpdateable> objects = new List<IUpdateable>();
     private bool eate = false;
-    private int count = 1;
+    private int count = 0;
     public GameObject tail;
-    public IUpdateable obj;
+    List<Transform> objects = new List<Transform>();
+    GameObject[] gameObjects = new GameObject[30];
     private bool[] direction = { false, false, false, false };
     int dir;
+    int n = 0;
+    private float step = 0.05f;
     float x = 0;
     float y = 0;
-    
+    GameObject g;
+
     void Start()
     {
-        
+        Vector3 v = transform.localPosition;
+        for (int i = 0; i < 10; i++)
+        {
+            g = (GameObject)Instantiate(tail, v, Quaternion.identity);
+            objects.Insert(0, g.transform);
+        }
     }
 
     void Update()
@@ -53,13 +62,11 @@ class UpdateController : MonoBehaviour, IUpdateable
             direction[3] = true;
         }
 
-        float step = 0.2f;
+
         Move(step);
-        //foreach (IUpdateable obj in objects)
-        //{
-        //    Move(step);
-        //}
-        
+
+
+
     }
     /// <summary>
     /// In this method we make our snake to move with some spped to another direction.
@@ -67,6 +74,9 @@ class UpdateController : MonoBehaviour, IUpdateable
     /// <param name="speed">Speed for our Snake</param>
     public void Move(float speed)
     {
+        Vector3 v = transform.localPosition;
+
+
         x = 0;
         y = 0;
 
@@ -99,7 +109,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = -1;
             y -= speed;
             transform.Translate(x, y, 0);
-            if (transform.localPosition.y < 0)
+            if (transform.localPosition.y < 1)
             {
                 transform.Translate(x, y + 80, 0);
             }
@@ -147,7 +157,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = -1;
             x -= speed;
             transform.Translate(x, y, 0);
-            if (transform.localPosition.x < 0)
+            if (transform.localPosition.x < 1)
             {
                 transform.Translate(x + 54, y, 0);
             }
@@ -165,7 +175,25 @@ class UpdateController : MonoBehaviour, IUpdateable
                 transform.Translate(x, y + move, 0);
             }
         }
-    }    
+
+        if (eate)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                g = (GameObject)Instantiate(tail, v, Quaternion.identity);
+                gameObjects[i] = g;
+                n += 20;
+                objects.Insert(0, g.transform);
+            }
+            eate = false;
+        }
+        else if (objects.Count > 0)
+        {
+            objects.Last().localPosition = v;
+            objects.Insert(0, objects.Last());
+            objects.RemoveAt(objects.Count - 1);
+        }
+    }
 
     void OnTriggerEnter2D(Collider2D food)
     {
@@ -175,7 +203,26 @@ class UpdateController : MonoBehaviour, IUpdateable
             Destroy(food.gameObject);
             count++;
             SpawnFood.isAnyFood = false;
+            if (count == 3)
+            {
+                Tail();
+            }
         }
+    }
+
+    void Tail()
+    {
+        foreach (GameObject objf in GameObject.FindGameObjectsWithTag("snakeTailPrefab(Clone)"))
+        {
+            Destroy(objf);
+        }
+        //for (int i = 0; i < gameObjects.Length; i++)
+        //{
+        //    Destroy(gameObjects[i]);
+        //}
+        step += 0.05f;
+        objects.Clear();
+        count = 0;
     }
 }
 
