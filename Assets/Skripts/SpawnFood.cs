@@ -32,7 +32,7 @@ public class SpawnFood : MonoBehaviour
         int y = 0;
         // Random coordinates x and y.
         x = (int)Random.Range(1, 53);
-        y = (int)Random.Range(1, 79);
+        y = (int)Random.Range(1, 76);
         SpawnFood.isAnyFood = true;
 
         //foodPrefab.AddComponent<Rigidbody>();
