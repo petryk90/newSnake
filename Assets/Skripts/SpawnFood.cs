@@ -31,8 +31,8 @@ public class SpawnFood : MonoBehaviour
         int x = 0;
         int y = 0;
         // Random coordinates x and y.
-        x = (int)Random.Range(1, 54);
-        y = (int)Random.Range(1, 80);
+        x = (int)Random.Range(1, 53);
+        y = (int)Random.Range(1, 79);
         SpawnFood.isAnyFood = true;
 
         //foodPrefab.AddComponent<Rigidbody>();

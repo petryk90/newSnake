@@ -3,26 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
-class UpdateController : MonoBehaviour, IUpdateable
+class UpdateController : MonoBehaviour
 {
 
-    //List<IUpdateable> objects = new List<IUpdateable>();
+    
     private bool eate = false;
     private int count = 0;
     public GameObject tail;
     List<Transform> objects = new List<Transform>();
-    GameObject[] gameObjects = new GameObject[30];
     private bool[] direction = { false, false, false, false };
     int dir;
-    int n = 0;
     private float step = 0.05f;
+    public Text levelCount;
+    public Text lifeCount;
+    public Text eatedFoodCount;
     float x = 0;
     float y = 0;
     GameObject g;
 
     void Start()
     {
+        // make Snake longer
         Vector3 v = transform.localPosition;
         for (int i = 0; i < 10; i++)
         {
@@ -85,9 +88,9 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = 1;
             y += speed;
             transform.Translate(x, y, 0);
-            if (transform.localPosition.y > 80)
+            if (transform.localPosition.y > 79)
             {
-                transform.Translate(x, y - 80, 0);
+                transform.Translate(x, y - 79, 0);
             }
         }
         else if (direction[0] && transform.localPosition.x % 1 != 0)
@@ -111,7 +114,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             transform.Translate(x, y, 0);
             if (transform.localPosition.y < 1)
             {
-                transform.Translate(x, y + 80, 0);
+                transform.Translate(x, y + 79, 0);
             }
         }
         else if (direction[1] && transform.localPosition.x % 1 != 0)
@@ -133,9 +136,9 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = 1;
             x += speed;
             transform.Translate(x, y, 0);
-            if (transform.localPosition.x > 54)
+            if (transform.localPosition.x > 53)
             {
-                transform.Translate(x - 54, y, 0);
+                transform.Translate(x - 53, y, 0);
             }
         }
         else if (direction[2] && transform.localPosition.y % 1 != 0)
@@ -159,7 +162,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             transform.Translate(x, y, 0);
             if (transform.localPosition.x < 1)
             {
-                transform.Translate(x + 54, y, 0);
+                transform.Translate(x + 53, y, 0);
             }
         }
         else if (direction[3] && transform.localPosition.y % 1 != 0)
@@ -175,14 +178,12 @@ class UpdateController : MonoBehaviour, IUpdateable
                 transform.Translate(x, y + move, 0);
             }
         }
-
+        // if Snake eate food we create tail and add to our transform list
         if (eate)
         {
             for (int i = 0; i < 20; i++)
             {
                 g = (GameObject)Instantiate(tail, v, Quaternion.identity);
-                gameObjects[i] = g;
-                n += 20;
                 objects.Insert(0, g.transform);
             }
             eate = false;
@@ -194,7 +195,10 @@ class UpdateController : MonoBehaviour, IUpdateable
             objects.RemoveAt(objects.Count - 1);
         }
     }
-
+    /// <summary>
+    /// destroy food when snake eate it, and if snake eate some count of food call Tail() method
+    /// </summary>
+    /// <param name="food"></param>
     void OnTriggerEnter2D(Collider2D food)
     {
         if (food.name.StartsWith("foodPrefab"))
@@ -203,7 +207,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             Destroy(food.gameObject);
             count++;
             SpawnFood.isAnyFood = false;
-            if (count == 3)
+            if (count == 10)
             {
                 Tail();
             }
@@ -212,14 +216,13 @@ class UpdateController : MonoBehaviour, IUpdateable
 
     void Tail()
     {
-        foreach (GameObject objf in GameObject.FindGameObjectsWithTag("snakeTailPrefab(Clone)"))
+        // destroy Snake Tail before grown speed
+        var clones = GameObject.FindGameObjectsWithTag("clone");
+        foreach (var clone in clones)
         {
-            Destroy(objf);
+            Destroy(clone);
         }
-        //for (int i = 0; i < gameObjects.Length; i++)
-        //{
-        //    Destroy(gameObjects[i]);
-        //}
+        // grown speed after eating count food
         step += 0.05f;
         objects.Clear();
         count = 0;
