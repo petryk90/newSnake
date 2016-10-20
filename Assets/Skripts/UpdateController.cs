@@ -13,7 +13,6 @@ class UpdateController : MonoBehaviour, IUpdateable
     private int count = 0;
     public GameObject tail;
     List<Transform> objects = new List<Transform>();
-    List<Vector3> vect = new List<Vector3>();
     private bool[] direction = { false, false, false, false };
     int dir;
     private int lifeCountt;
@@ -26,6 +25,14 @@ class UpdateController : MonoBehaviour, IUpdateable
     float x = 0;
     float y = 0;
     GameObject g;
+    private SwipeDetect Swipe = new SwipeDetect();
+    public static bool endGame = false;
+
+    public void GameStart()
+    {
+        endGame = false;
+        Start();
+    }
 
 
     void Start()
@@ -37,12 +44,11 @@ class UpdateController : MonoBehaviour, IUpdateable
         {
             g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y, 0), Quaternion.identity);
             objects.Insert(0, g.transform);
-            
+
         }
         lifeCountt = 3;
         eatedFood = 0;
         levelCountt = 1;
-
     }
 
     void Update()
@@ -50,6 +56,12 @@ class UpdateController : MonoBehaviour, IUpdateable
         levelCount.text = Convert.ToString(levelCountt);
         lifeCount.text = Convert.ToString(lifeCountt);
         eatedFoodCount.text = Convert.ToString(eatedFood);
+
+        //Swipe.SwipeDet();
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    direction[i] = SwipeDetect.SwipeDirect[i];
+        //}
 
         if (Input.GetKey(KeyCode.UpArrow))
         {
@@ -80,8 +92,12 @@ class UpdateController : MonoBehaviour, IUpdateable
             direction[3] = true;
         }
 
+
+        Crash();
         Move(step);
     }
+
+
     /// <summary>
     /// In this method we make our snake to move with some spped to another direction.
     /// </summary>
@@ -99,7 +115,7 @@ class UpdateController : MonoBehaviour, IUpdateable
             transform.Translate(x, y, 0);
             if (v.y > 76)
             {
-                transform.Translate(x, y - 76, 0);
+                transform.Translate(x, y - 72, 0);
             }
         }
         else if (direction[0] && v.x % 1 != 0)
@@ -121,9 +137,9 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = -1;
             y -= speed;
             transform.Translate(x, y, 0);
-            if (v.y < 1)
+            if (v.y < 4)
             {
-                transform.Translate(x, y + 76, 0);
+                transform.Translate(x, y + 72, 0);
             }
         }
         else if (direction[1] && v.x % 1 != 0)
@@ -145,9 +161,9 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = 1;
             x += speed;
             transform.Translate(x, y, 0);
-            if (v.x > 53)
+            if (v.x > 49)
             {
-                transform.Translate(x - 53, y, 0);
+                transform.Translate(x - 44, y, 0);
             }
         }
         else if (direction[2] && v.y % 1 != 0)
@@ -169,9 +185,9 @@ class UpdateController : MonoBehaviour, IUpdateable
             dir = -1;
             x -= speed;
             transform.Translate(x, y, 0);
-            if (v.x < 1)
+            if (v.x < 5)
             {
-                transform.Translate(x + 53, y, 0);
+                transform.Translate(x + 44, y, 0);
             }
         }
         else if (direction[3] && v.y % 1 != 0)
@@ -187,47 +203,11 @@ class UpdateController : MonoBehaviour, IUpdateable
                 transform.Translate(x, y + move, 0);
             }
         }
-        // if Snake eate food we create tail and add to our transform list
-        if (eate)
-        {
-            for (int j = 0; j < 20; j++)
-            {
-                if (direction[0])
-                {
-                    g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y + 1, 0), Quaternion.identity);
-                }
-                if (direction[1])
-                {
-                    g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y - 1, 0), Quaternion.identity);
-                }
-                if (direction[2])
-                {
-                    g = (GameObject)Instantiate(tail, new Vector3(v.x + 1, v.y, 0), Quaternion.identity);
-                }
-                if (direction[3])
-                {
-                    g = (GameObject)Instantiate(tail, new Vector3(v.x - 1, v.y, 0), Quaternion.identity);
-                }
-
-                objects.Insert(0, g.transform);
-            }
-            eate = false;
-        }
-        else if (objects.Count > 0)
-        {
-
-            objects.Last().localPosition = v;
-            objects.Insert(0, objects.Last());
-            objects.RemoveAt(objects.Count - 1);
-        }
-
+        NewTail();
     }
 
 
-    void newTail()
-    {
 
-    }
     /// <summary>
     /// destroy food when snake eate it, and if snake eate some count of food call Tail() method
     /// </summary>
@@ -248,14 +228,75 @@ class UpdateController : MonoBehaviour, IUpdateable
         }
         else
         {
-            for (int i = 11; i < eatedFood * 20; i++)
-            {
-                if (objects.First().localPosition == objects[i].localPosition)
-                {
-                    lifeCountt--;
-                }
-            }
 
+        }
+    }
+
+
+    void Crash()
+    {
+        Vector3 lp = transform.localPosition;
+
+
+        for (int i = 11; i < objects.Count; i++)
+        {
+            Vector3 op = objects[i].localPosition;
+            Vector3 opi = objects[i-1].localPosition;
+            Vector3 opj = objects[i-2].localPosition;
+            if (Vector3.Distance(lp, op) < step && Vector3.Distance(lp, opi) < step)
+            {
+                lifeCountt--;
+                var clones = GameObject.FindGameObjectsWithTag("clone");
+                foreach (var clone in clones)
+                {
+                    Destroy(clone);
+                }
+                objects.Clear();
+            }
+            if (lifeCountt<0)
+            {
+                endGame = true;
+            }
+        }
+    }
+
+    void NewTail()
+    {
+        // if Snake eate food we create tail and add to our transform list
+        Vector3 v = transform.localPosition;
+        if (eate)
+        {
+            for (int j = 0; j < 20; j++)
+            {
+                if (direction[0])
+                {
+                    g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y - 1, 0), Quaternion.identity);
+                }
+                if (direction[1])
+                {
+                    g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y + 1, 0), Quaternion.identity);
+                }
+                if (direction[2])
+                {
+                    g = (GameObject)Instantiate(tail, new Vector3(v.x - 1, v.y, 0), Quaternion.identity);
+                }
+                if (direction[3])
+                {
+                    g = (GameObject)Instantiate(tail, new Vector3(v.x + 1, v.y, 0), Quaternion.identity);
+                }
+
+                objects.Insert(0, g.transform);
+
+            }
+            eate = false;
+
+        }
+        else if (objects.Count > 0)
+        {
+            
+            objects.Last().localPosition = v;
+            objects.Insert(0, objects.Last());
+            objects.RemoveAt(objects.Count - 1);
 
         }
     }
