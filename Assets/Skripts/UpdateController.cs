@@ -30,25 +30,29 @@ class UpdateController : MonoBehaviour, IUpdateable
 
     public void GameStart()
     {
+        MainMenuScript.newGame = false;
         endGame = false;
-        Start();
-    }
-
-
-    void Start()
-    {
-
-        // make Snake longer
+        lifeCountt = 3;
+        eatedFood = 0;
+        levelCountt = 1;
+        step = 0.05f;
+        count = 0;
         Vector3 v = transform.localPosition;
+        v.x = 27.0f;
+        v.y = 40.0f;
         for (int i = 0; i < 10; i++)
         {
             g = (GameObject)Instantiate(tail, new Vector3(v.x, v.y, 0), Quaternion.identity);
             objects.Insert(0, g.transform);
 
         }
-        lifeCountt = 3;
-        eatedFood = 0;
-        levelCountt = 1;
+    }
+
+
+    void Start()
+    {
+        // make Snake longer
+        GameStart();
     }
 
     void Update()
@@ -56,6 +60,10 @@ class UpdateController : MonoBehaviour, IUpdateable
         levelCount.text = Convert.ToString(levelCountt);
         lifeCount.text = Convert.ToString(lifeCountt);
         eatedFoodCount.text = Convert.ToString(eatedFood);
+        if (MainMenuScript.newGame)
+        {
+            GameStart();
+        }
 
         //Swipe.SwipeDet();
         //for (int i = 0; i < 4; i++)
@@ -242,7 +250,6 @@ class UpdateController : MonoBehaviour, IUpdateable
         {
             Vector3 op = objects[i].localPosition;
             Vector3 opi = objects[i-1].localPosition;
-            Vector3 opj = objects[i-2].localPosition;
             if (Vector3.Distance(lp, op) < step && Vector3.Distance(lp, opi) < step)
             {
                 lifeCountt--;
@@ -252,6 +259,7 @@ class UpdateController : MonoBehaviour, IUpdateable
                     Destroy(clone);
                 }
                 objects.Clear();
+                lp = new Vector3(27, 40, 0);
             }
             if (lifeCountt<0)
             {
