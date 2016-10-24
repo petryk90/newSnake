@@ -11,8 +11,11 @@ public class MainMenuScript : MonoBehaviour
     public GameObject LastMenu;
     public static int life = 0;
     public static bool newGame = false;
-    public AudioClip onAnotherPage;
+    public static AudioClip playAll;
+    public AudioClip playEate;
+    public AudioClip playChangePanel;
     AudioSource Sound;
+    private bool isPlayAllGame = true;
 
     void Start()
     {
@@ -23,10 +26,9 @@ public class MainMenuScript : MonoBehaviour
     }
 
     public void OnButtonPlayClick()
-    {        
-        Sound = GetComponent<AudioSource>();
-        Sound.Play();
-        
+    {
+        PLayWhenChaingePanel();
+
         if (UpdateController.endGame)
         {
             newGame = true;
@@ -42,8 +44,7 @@ public class MainMenuScript : MonoBehaviour
 
     public void OnButtonPlayAgainClick()
     {
-        Sound = GetComponent<AudioSource>();
-        Sound.Play();
+        PLayWhenChaingePanel();
         UpdateController.endGame = false;
         life = 3;
         LastMenu.SetActive(false);
@@ -55,24 +56,54 @@ public class MainMenuScript : MonoBehaviour
 
     public void OnButtonSettingClick()
     {
-        Sound = GetComponent<AudioSource>();
-        Sound.Play();
+        PLayWhenChaingePanel();
         mainMenu.SetActive(false);
         SettingMenu.SetActive(true);
     }
 
     public void OnButtonBackInSettingClick()
     {
-        Sound = GetComponent<AudioSource>();
-        Sound.Play();
+        PLayWhenChaingePanel();
         mainMenu.SetActive(true);
         SettingMenu.SetActive(false);
         Head.SetActive(false);
 
     }
 
+    void PLayWhenChaingePanel()
+    {
+        Sound = GetComponent<AudioSource>();
+        //Sound.Play();
+        Sound.PlayOneShot(playChangePanel);
+        
+    }
+
+    void PLayAllGame()
+    {
+        Sound = GetComponent<AudioSource>();
+        Sound.clip = playAll;
+        Sound.Play();
+    }
+
+    void PlayIfEate()
+    {
+        Sound = GetComponent<AudioSource>();        
+        Sound.PlayOneShot(playEate);        
+    }
+
     void Update()
     {
+        //if (isPlayAllGame)
+        //{
+        //    PLayAllGame();
+        //}
+
+
+        if (UpdateController.musicForEate)
+        {
+            PlayIfEate();
+        }
+
         if (UpdateController.endGame)
         {
             Head.SetActive(false);

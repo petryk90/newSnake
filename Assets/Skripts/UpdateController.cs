@@ -10,6 +10,7 @@ class UpdateController : MonoBehaviour, IUpdateable
 
 
     private bool eate = false;
+    public static bool musicForEate = false;
     private int count = 0;
     public GameObject tail;
     List<Transform> objects = new List<Transform>();
@@ -225,6 +226,7 @@ class UpdateController : MonoBehaviour, IUpdateable
         if (food.name.StartsWith("foodPrefab"))
         {
             eate = true;
+            musicForEate = true;
             Destroy(food.gameObject);
             count++;
             eatedFood++;
